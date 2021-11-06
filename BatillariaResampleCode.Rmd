@@ -1,0 +1,207 @@
+---
+title: "BatResampleCode"
+author: "Kali Prescott"
+date: "11/6/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+### Loading some packages first you may need to install these, but i dont think you need any for this code
+
+```{r packages}
+library(sjstats) # few useful packages
+library(lme4) #needed for random effects question
+library(lmerTest) #needed for random effects question
+library(car) # for levenes test for equal variances
+library(gridExtra)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(plyr)
+#install.packages("ggpubr") # example of code to install a package
+library(ggpubr)
+```
+
+
+#### Load CSV File
+
+```{r load file}
+setwd("C:\\Users\\User\\Documents\\College\\MLMLMasters\\MarineEcology\\BatLab\\")
+bat=read.csv(file = 'bat2021.csv', header=TRUE)
+bat
+```
+
+#### Resample loop for small quadrat
+
+```{r resample small}
+trials=1000
+urn=bat$Small..15.cm.
+ReMeans = NULL # create a null matrix to store the resampled means
+ReSD = NULL
+ReSE = NULL
+RePre = NULL
+ReDensity = NULL
+# setting up the loop to resample
+means = NULL
+SD = NULL
+SE = NULL
+Pre = NULL
+Density = NULL
+Area.s = 3.14*(15^2)
+Area.m = 3.14*(30^2)
+Area.l = 3.14*(45^2)
+N=length(bat$Small..15.cm.)
+SampleSize <- 0
+for (j in 1:N) { 
+  for(i in 1:trials) {
+    xx = (sample(urn, j, replace = FALSE)) #new resample (50 values in this case)
+    u = mean(xx/Area.s) #estimate mean of resample
+    ReMeans[i] = u #save the mean in the matrix
+    jmeans = mean(ReMeans)
+    u = sd(xx/Area.s) #estimate SD of resample
+    ReSD[i] = u #save the SD in the matrix
+    jSD = mean(ReSD)
+    u = (sd(xx/Area.s)/sqrt(j)) #estimate SE of resample
+    ReSE[i] = u#save the SE in the matrix
+    jSE = mean(ReSE)
+    u = ((sd(xx/Area.s)/sqrt(j))/mean(xx)) #estimate Precision of resample
+    RePre[i] = u #save the Precision in the matrix
+    jPre = mean(RePre)
+    u = (xx/Area.s) #estimate Density of resample
+    ReDensity[i] = u#save the Density in the matrix
+    jDensity = mean(ReDensity)
+    }
+  SampleSize[j] = j
+  means[j] <-c(jmeans)
+  SD[j] <-c(jSD) 
+  SE[j] <-c(jSE)
+  Pre[j] <-c(jSE/jmeans)
+  Density[j] <- c(jDensity)
+  }  
+```
+
+#### Put the data from the for loop into a list then into a dataframe
+
+```{r export small}  
+List <- list(Mean = means, Density = Density, Std.Dev = SD, Std.Er = SE, Precision = Pre, SampleSize=SampleSize)
+small = as.data.frame(List)
+small$QuadSize = "small" 
+```
+
+#### Resample loop for medium quadrat
+
+```{r resample medium}
+
+bat$Total..Small...Medium. = as.numeric(as.character(bat$Total..Small...Medium.))
+urn=bat$Total..Small...Medium.
+ReMeans = NULL # create a null matrix to store the resampled means
+ReSD = NULL
+ReSE = NULL
+RePre = NULL
+ReDensity = NULL
+means = NULL
+SD = NULL
+SE = NULL
+Pre = NULL
+N=length(bat$Total..Small...Medium.)
+SampleSize <- 0
+for (j in 1:N) { 
+  for(i in 1:trials) {
+    xx = (sample(urn, j, replace = FALSE)) #new resample (50 values in this case)
+    u = mean(xx/Area.s) #estimate mean of resample
+    ReMeans[i] = u #save the mean in the matrix
+    jmeans = mean(ReMeans)
+    u = sd(xx/Area.s) #estimate SD of resample
+    ReSD[i] = u #save the SD in the matrix
+    jSD = mean(ReSD)
+    u = (sd(xx/Area.s)/sqrt(j)) #estimate SE of resample
+    ReSE[i] = u#save the SE in the matrix
+    jSE = mean(ReSE)
+    u = ((sd(xx/Area.s)/sqrt(j))/mean(xx)) #estimate Precision of resample
+    RePre[i] = u #save the Precision in the matrix
+    jPre = mean(RePre)
+    u = (xx/Area.s) #estimate Density of resample
+    ReDensity[i] = u#save the Density in the matrix
+    jDensity = mean(ReDensity)
+  }
+  SampleSize[j] = j
+  means[j] <-c(jmeans)
+  SD[j] <-c(jSD) 
+  SE[j] <-c(jSE)
+  Pre[j] <-c(jSE/jmeans)
+  Density[j] <- c(jDensity)
+} 
+```
+
+```{r export med}
+List <- list(Mean = means, Density = Density, Std.Dev = SD, Std.Er = SE, Precision = Pre, SampleSize=SampleSize)
+med = as.data.frame(List)
+med$QuadSize = "medium" 
+```
+
+#### Resample loop for large quadrat
+
+```{r resample lar}
+urn=bat$Total..Small...Medium...Large.
+ReMeans = NULL # create a null matrix to store the resampled values that are calculated in the loop
+ReSD = NULL
+ReSE = NULL
+RePre = NULL
+ReDensity = NULL
+means = NULL
+SD = NULL
+SE = NULL
+Pre = NULL
+N=length(bat$Total..Small...Medium...Large.)
+SampleSize <- 0
+for (j in 1:N) { 
+  for(i in 1:trials) {
+    xx = (sample(urn, j, replace = FALSE)) #new resample (50 values in this case)
+    u = mean(xx/Area.s) #estimate mean of resample
+    ReMeans[i] = u #save the mean in the matrix
+    jmeans = mean(ReMeans)
+    u = sd(xx/Area.s) #estimate SD of resample
+    ReSD[i] = u #save the SD in the matrix
+    jSD = mean(ReSD)
+    u = (sd(xx/Area.s)/sqrt(j)) #estimate SE of resample
+    ReSE[i] = u#save the SE in the matrix
+    jSE = mean(ReSE)
+    u = ((sd(xx/Area.s)/sqrt(j))/mean(xx)) #estimate Precision of resample
+    RePre[i] = u #save the Precision in the matrix
+    jPre = mean(RePre)
+    u = (xx/Area.s) #estimate Density of resample
+    ReDensity[i] = u#save the Density in the matrix
+    jDensity = mean(ReDensity)
+  }
+  SampleSize[j] = j
+  means[j] <-c(jmeans)
+  SD[j] <-c(jSD) 
+  SE[j] <-c(jSE)
+  Pre[j] <-c(jSE/jmeans)
+  Density[j] <- c(jDensity)
+} 
+```
+
+```{r export lar}
+List <- list(Mean = means, Density = Density, Std.Dev = SD, Std.Er = SE, Precision = Pre, SampleSize=SampleSize)
+lar = as.data.frame(List)
+lar$QuadSize = "large" 
+```
+
+#### Export all data frames to csv 
+
+```{r export all}
+output_path = (paste("C:\\Users\\User\\Documents\\College\\MLMLMasters\\MarineEcology\\BatLab\\outfile\\", sep = ""))
+write.csv(small,
+          paste( output_path, "small", ".csv", sep="" ))
+output_path = (paste("C:\\Users\\User\\Documents\\College\\MLMLMasters\\MarineEcology\\BatLab\\outfile\\", sep = ""))
+write.csv(med,
+          paste( output_path, "med", ".csv", sep="" ))
+output_path = (paste("C:\\Users\\User\\Documents\\College\\MLMLMasters\\MarineEcology\\BatLab\\outfile\\", sep = ""))
+write.csv(lar,
+          paste( output_path, "lar", ".csv", sep="" ))
+```
+
